@@ -1,7 +1,7 @@
 <script>
 export default {
   name: 'rl-carousel-slide',
-  inject: ['slideProps'],
+  inject: ['height', 'spacing', 'vertical', 'width'],
   render (h) {
     return h('div', this.props, this.$slots.default)
   },
@@ -9,11 +9,21 @@ export default {
     props () {
       return {
         style: {
-          [`margin-${this.slideProps.vertical ? 'bottom' : 'right'}`]: `${this.slideProps.rightMargin}px`,
-          width: this.slideProps.width || '100%',
-          'flex-shrink': 0
+          'flex-shrink': 0,
+          height: this.height === undefined ? 'auto' : this.height,
+          [`margin-${this.vertical ? 'bottom' : 'right'}`]: this.spacing,
+          width: this.width === undefined ? '100%' : this.width,
+          ...this.verticalStyles
         }
       }
+    },
+    verticalStyles () {
+      return this.vertical ? {
+        display: 'flex',
+        'flex-direction': 'column',
+        'align-items': 'stretch',
+        'justify-content': 'center'
+      } : {}
     }
   }
 }
