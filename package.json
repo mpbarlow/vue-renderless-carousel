@@ -1,0 +1,32 @@
+{
+  "name": "vue-renderless-carousel",
+  "description": "A renderless Vue component encapsulating carousel functionality",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "Matt Barlow",
+  "main": "index.js",
+  "homepage": "https://barlow.coffee/carousel",
+  "keywords": [
+    "vue",
+    "carousel",
+    "renderless",
+    "vuejs",
+    "component"
+  ],
+  "dependencies": {
+    "element-resize-detector": "^1.1.14"
+  },
+  "peerDependencies": {
+    "vue": "^2.5.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.3",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "eslint-plugin-vue": "^4.5.0"
+  }
+}
