@@ -7,29 +7,26 @@ export default {
   name: 'rl-carousel',
   render () {
     return this.$scopedSlots.default({
-      wrapperProps: this.wrapperProps,
-      innerProps: this.innerProps,
-      itemCount: this.itemCount,
-      activeIndex: this.activeIndex,
-      selectIndex: this.selectIndex
+      styleProps: {
+        wrapper: this.wrapperProps,
+        inner: this.innerProps
+      },
+      slides: {
+        count: this.slideCount,
+        active: this.activeSlide,
+        moveTo: this.moveToSlide
+      }
     })
   },
   provide () {
     return {
-      itemProps: {
-        style: {
-          [`margin-${this.vertical ? 'bottom' : 'right'}`]: `${this.margin}px`,
-          width: '100%',
-          'flex-shrink': 0
-        }
+      slideProps: {
+        vertical: this.vertical,
+        rightMargin: this.rightMargin
       }
     }
   },
   props: {
-    animated: {
-      type: Boolean,
-      default: true
-    },
     autoScrollInterval: {
       type: [Number, String],
       default: 0
@@ -45,9 +42,21 @@ export default {
     nextIndex: {
       type: Function
     },
+    noWrap: {
+      type: Boolean,
+      default: false
+    },
+    overflow: {
+      type: Boolean,
+      default: false
+    },
     spaceBetween: {
       type: [Number, String],
       default: 0
+    },
+    static: {
+      type: Boolean,
+      default: false
     },
     stopOnUserSelect: {
       type: Boolean,
@@ -69,17 +78,13 @@ export default {
     vertical: {
       type: Boolean,
       default: false
-    },
-    wrap: {
-      type: Boolean,
-      default: true
     }
   },
   data () {
     return {
-      activeIndex: 0,
+      activeSlide: 0,
       carouselSize: 0,
-      itemCount: 0,
+      slideCount: 0,
       mainAxisStart: undefined,
       mainAxisEnd: undefined,
       crossAxisStart: undefined,
@@ -92,7 +97,7 @@ export default {
       return {
         style: {
           height: this.vertical ? `${this.height}px` : 'auto',
-          overflow: 'hidden'
+          overflow: this.overflow ? 'visible' : 'hidden'
         }
       }
     },
@@ -106,7 +111,7 @@ export default {
         }
       }
     },
-    margin () {
+    rightMargin () {
       return parseInt(this.spaceBetween)
     },
     mainAxisDragOffset () {
@@ -121,25 +126,32 @@ export default {
         : 'all 0s'
     },
     mainAxisTranslate () {
-      return (this.activeIndex * (this.carouselSize + this.margin)) + this.mainAxisDragOffset
+      return (this.activeSlide * (this.carouselSize + this.rightMargin)) + this.mainAxisDragOffset
+    },
+    wrap () {
+      return !this.noWrap
+    },
+    animated () {
+      return !this.static
     }
   },
   methods: {
-    selectIndex (index) {
-      this.activeIndex = index
+    moveToSlide (index) {
+      this.activeSlide = index
       if (this.stopOnUserSelect) clearInterval(this.intervalHandler)
     }
   },
   watch: {
-    activeIndex (newVal) {
-      if (newVal >= this.itemCount) this.activeIndex = this.wrap ? 0 : this.itemCount - 1
-      if (newVal < 0) this.activeIndex = this.wrap ? this.itemCount - 1 : 0
+    activeSlide (newVal) {
+      if (newVal >= this.slideCount) this.activeSlide = this.wrap ? 0 : this.slideCount - 1
+      if (newVal < 0) this.activeSlide = this.wrap ? this.slideCount - 1 : 0
+      this.$emit('slide-changed', this.activeSlide)
     }
   },
   mounted () {
     this.carouselSize = this.vertical ? parseInt(this.height) : this.$el.clientWidth
-    this.itemCount = this.$children.filter(vn => vn.$options.name === 'rl-carousel-item').length
-    this.activeIndex = parseInt(this.initialIndex)
+    this.slideCount = this.$children.filter(vn => vn.$options.name === 'rl-carousel-slide').length
+    this.activeSlide = parseInt(this.initialIndex)
 
     // Re-translate on bounds change
     erd.listenTo(this.$el, el => {
@@ -173,10 +185,10 @@ export default {
 
       // Swipes >= 20% of carousel size change the active index.
       if ((Math.abs(this.mainAxisDragOffset) / this.carouselSize) * 100 >= 20) {
-        if (this.mainAxisDragOffset < 0 && (this.activeIndex > 0 || this.touchWrap)) {
-          this.selectIndex(this.activeIndex - 1)
-        } else if (this.mainAxisDragOffset > 0 && (this.activeIndex < this.itemCount - 1 || this.touchWrap)) {
-          this.selectIndex(this.activeIndex + 1)
+        if (this.mainAxisDragOffset < 0 && (this.activeSlide > 0 || this.touchWrap)) {
+          this.moveToSlide(this.activeSlide - 1)
+        } else if (this.mainAxisDragOffset > 0 && (this.activeSlide < this.slideCount - 1 || this.touchWrap)) {
+          this.moveToSlide(this.activeSlide + 1)
         }
       }
 
@@ -198,16 +210,16 @@ export default {
         if (this.mainAxisStart === undefined) {
           // If the user has supplied an autoscroll function, use that instead
           if (typeof this.nextIndex === 'function') {
-            this.activeIndex = this.nextIndex(this.activeIndex, this.itemCount)
+            this.activeSlide = this.nextIndex(this.activeSlide, this.slideCount)
           } else {
             const forwards = this.autoScrollInterval > 0
             // Do this manually so we still wrap when autoscrolling if user wrapping is disabled
-            if (forwards && this.activeIndex >= this.itemCount - 1) {
-              this.activeIndex = 0
-            } else if (!forwards && this.activeIndex <= 0) {
-              this.activeIndex = this.itemCount - 1
+            if (forwards && this.activeSlide >= this.slideCount - 1) {
+              this.activeSlide = 0
+            } else if (!forwards && this.activeSlide <= 0) {
+              this.activeSlide = this.slideCount - 1
             } else {
-              this.activeIndex += forwards ? 1 : -1
+              this.activeSlide += forwards ? 1 : -1
             }
           }
         }

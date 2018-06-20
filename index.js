@@ -1,4 +1,4 @@
 import RlCarousel from './src/RlCarousel.vue'
-import RlCarouselItem from './src/RlCarouselItem.vue'
+import RlCarouselSlide from './src/RlCarouselSlide.vue'
 
-export { RlCarousel, RlCarouselItem }
+export { RlCarousel, RlCarouselSlide }
