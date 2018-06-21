@@ -5,18 +5,6 @@ const erd = elementResizeDetectorMaker({ strategy: 'scroll' })
 
 export default {
   name: 'rl-carousel',
-  render () {
-    return this.$scopedSlots.default({
-      styleProps: {
-        wrapper: this.wrapperProps,
-        inner: this.innerProps
-      },
-      slides: {
-        count: this.slideCount,
-        active: this.value,
-      }
-    })
-  },
   props: {
     autoScrollInterval: {
       type: [Boolean, Number, String],
@@ -25,20 +13,6 @@ export default {
     noWrap: {
       type: Boolean,
       default: false
-    },
-    overflow: {
-      type: Boolean,
-      default: false
-    },
-    slideHeight: {
-      type: [Number, String],
-    },
-    slideWidth: {
-      type: [Number, String]
-    },
-    spaceBetween: {
-      type: [Number, String],
-      default: 0
     },
     static: {
       type: Boolean,
@@ -66,54 +40,44 @@ export default {
       default: false
     }
   },
-  provide () {
-    return {
-      height: this.slideHeight,
-      spacing: this.spaceBetween,
-      vertical: this.vertical,
-      width: this.slideWidth
-    }
-  },
   data () {
     return {
-      activeSlide: 0,
-      slideSize: 0,
-      clientSize: undefined,
+      slideSizes: [],
+      carouselSize: 0,
+      clientSize: 0,
       slideCount: 0,
       mainAxisStart: undefined,
       mainAxisEnd: undefined,
       crossAxisStart: undefined,
       crossAxisEnd: undefined,
-      intervalHandler: undefined
+      intervalHandler: undefined,
     }
   },
-  computed: {
-    wrapperProps () {
-      return {
-        style: {
-          height: this.vertical ? `${this.clientSize}px` : 'auto',
-          overflow: this.overflow ? 'visible' : 'hidden'
-        }
+  render () {
+    return this.$scopedSlots.default({
+      wrapperStyles: this.wrapperStyles,
+      slides: {
+        count: this.slideCount,
+        active: this.value,
       }
-    },
-    innerProps () {
+    })
+  },
+  computed: {
+    wrapperStyles () {
       return {
         style: {
           transform: `translate${this.vertical ? 'Y' : 'X'}(${-this.mainAxisTranslate}px)`,
-          transition: this.transitionMode,
-          display: 'flex',
+          transition: this.transitionProperty,
+          display: 'inline-flex',
           'flex-wrap': `${this.vertical ? '' : 'no'}wrap`
         }
       }
-    },
-    spacing () {
-      return this.parseDimension(this.spaceBetween)
     },
     mainAxisDragOffset () {
       if (this.mainAxisStart === undefined || this.mainAxisEnd === undefined) return 0
       return this.mainAxisStart - this.mainAxisEnd
     },
-    transitionMode () {
+    transitionProperty () {
       // If we're touching we want the transform to follow the finger immediately rather than
       // transitioning
       return this.mainAxisEnd === undefined && this.animated
@@ -121,23 +85,21 @@ export default {
         : 'all 0s'
     },
     mainAxisTranslate () {
-      return (this.value * this.slideSize) - this.offsetToCenterInView + this.mainAxisDragOffset 
+      return this.accumulatedTranslate - this.offsetToCenterInView + this.mainAxisDragOffset 
+    },
+    accumulatedTranslate () {
+      return this.slideSizes.slice(0, this.value).reduce((a, c) => a + c, 0)
     },
     offsetToCenterInView () {
-      if (this.clientSize === undefined) return 0
-      return Math.round((this.clientSize / 2) - (this.slideSize / 2)) 
+      return this.carouselSize < this.clientSize
+        ? (this.carouselSize / 2) - (this.slideSizes[this.value] / 2)
+        : (this.clientSize - this.slideSizes[this.value]) / 2
     },
     wrap () {
       return !this.noWrap
     },
     animated () {
       return !this.static
-    },
-    parsedSlideWidth () {
-      return this.parseDimension(this.slideWidth)
-    },
-    parsedSlideHeight () {
-      return this.parseDimension(this.slideHeight)
     }
   },
   methods: {
@@ -157,32 +119,19 @@ export default {
         }
       }, parseInt(Math.abs(this.autoScrollInterval)))
     },
-    parseDimension (dimension) {
-      if (this.clientSize === undefined) {
-        return 0
-      }
+    setSizes (el) {
+      const size = `client${this.vertical ? 'Height' : 'Width'}`
+      const slides = this.$children.filter(vn => vn.$options.name === 'rl-carousel-slide')
 
-      if (dimension === undefined) {
-        return this.clientSize
-      }
+      this.clientSize = el[size]
+      this.slideSizes.splice(0, this.slideSizes.length)
 
-      if (dimension.slice(-2, dimension.length) === 'px') {
-        return parseFloat(dimension.slice(0, dimension.length - 2))
+      if (slides.length > 0) {
+        this.slideSizes.push(...slides.map(s => s.$el[size]))
+        this.carouselSize = slides.map(s => s.$el[size]).reduce((a, c) => a + c, 0)
+      } else {
+        this.carouselSize = 0
       }
-
-      if (dimension.slice(-2, dimension.length) === 'vw') {
-        return (document.documentElement.clientWidth / 100) * parseFloat(dimension.slice(0, dimension.length - 2))
-      }
-
-      if (dimension.slice(-2, dimension.length) === 'vh') {
-        return (document.documentElement.clientHeight / 100) * parseFloat(dimension.slice(0, dimension.length - 2))
-      }
-
-      if (dimension.slice(-1, dimension.length) === '%') {
-        return (this.clientSize / 100) * parseFloat(dimension.slice(0, dimension.length - 1))
-      }
-
-      return parseFloat(dimension)
     }
   },
   watch: {
@@ -190,7 +139,7 @@ export default {
       if (newVal >= this.slideCount) this.$emit('input', this.wrap ? 0 : this.slideCount - 1)
       if (newVal < 0) this.$emit('input', this.wrap ? this.slideCount - 1 : 0)
 
-      this.$emit('slide-changed', this.value)
+      this.$emit('rl-carousel-slide-changed', this.value)
     },
     autoScrollInterval (newVal) {
       clearInterval(this.intervalHandler)
@@ -200,30 +149,24 @@ export default {
     }
   },
   mounted () {
-    this.clientSize = this.vertical ? this.$el.clientHeight : this.$el.clientWidth
-
-    this.slideSize = this.vertical
-      ? this.parsedSlideHeight
-      : (this.slideWidth === undefined ? this.$el.clientWidth : this.parsedSlideWidth)
-
     this.slideCount = this.$children.filter(vn => vn.$options.name === 'rl-carousel-slide').length
+    this.setSizes(this.$el)
 
     // Re-translate on bounds change
     erd.listenTo(this.$el, el => {
-      this.slideSize = this.vertical
-        ? this.parsedSlideHeight
-        : (this.slideWidth === undefined ? el.clientWidth : this.parsedSlideWidth)
-
-        this.clientSize = this.vertical ? this.$el.clientHeight : el.clientWidth
+      this.$emit('rl-carousel-resize')
+      this.setSizes(el)
     })
 
     this.touchstart = event => {
+      this.$emit('rl-carousel-touchstart')
+
       this.mainAxisStart = Math.floor(event.touches[0][`client${this.vertical ? 'Y' : 'X'}`])
       this.crossAxisStart = Math.floor(event.touches[0][`client${this.vertical ? 'X' : 'Y'}`])
     }
 
     this.touchmove = event => {
-      this.$emit('user-touch')
+      this.$emit('rl-carousel-touchmove')
 
       this.mainAxisEnd = Math.floor(event.touches[0][`client${this.vertical ? 'Y' : 'X'}`])
       this.crossAxisEnd = Math.floor(event.touches[0][`client${this.vertical ? 'X' : 'Y'}`])
@@ -238,14 +181,18 @@ export default {
     }
 
     this.touchend = () => {
+      this.$emit('rl-carousel-touchend')
+
       // Just a touch, not a swipe
       if (this.mainAxisEnd === undefined) {
         this.mainAxisStart = undefined
         return
       }
 
+      this.$emit('rl-carousel-swipe-recognized')
+
       // Swipes >= 20% of carousel size change the active index.
-      if ((Math.abs(this.mainAxisDragOffset) / this.slideSize) * 100 >= 20) {
+      if ((Math.abs(this.mainAxisDragOffset) / this.slideSizes[this.value]) * 100 >= 20) {
         if (this.mainAxisDragOffset < 0 && (this.value > 0 || this.touchWrap)) {
           this.$emit('input', this.value - 1)
         } else if (this.mainAxisDragOffset > 0 && (this.value < this.slideCount - 1 || this.touchWrap)) {
@@ -265,7 +212,7 @@ export default {
     this.$el.addEventListener('touchend', this.touchend)
 
     // Auto-scroll: negative interval to scroll backwards
-    if (this.autoScrollInterval !== 0) {
+    if (this.autoScrollInterval) {
       this.spawnIntervalHandler()
     }
   },
