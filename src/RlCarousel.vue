@@ -6,9 +6,9 @@ const erd = elementResizeDetectorMaker({ strategy: 'scroll' })
 export default {
   name: 'rl-carousel',
   props: {
-    autoScrollInterval: {
-      type: [Boolean, Number, String],
-      default: 0
+    animateIn: {
+      type: Boolean,
+      default: false
     },
     noWrap: {
       type: Boolean,
@@ -42,6 +42,7 @@ export default {
   },
   data () {
     return {
+      positioned: false,
       slideSizes: [],
       carouselSize: 0,
       clientSize: 0,
@@ -49,8 +50,7 @@ export default {
       mainAxisStart: undefined,
       mainAxisEnd: undefined,
       crossAxisStart: undefined,
-      crossAxisEnd: undefined,
-      intervalHandler: undefined,
+      crossAxisEnd: undefined
     }
   },
   render () {
@@ -58,7 +58,7 @@ export default {
       wrapperStyles: this.wrapperStyles,
       slides: {
         count: this.slideCount,
-        active: this.value,
+        active: this.value
       }
     })
   },
@@ -66,12 +66,15 @@ export default {
     wrapperStyles () {
       return {
         style: {
+          display: 'inline-flex',
+          'flex-wrap': `${this.vertical ? '' : 'no'}wrap`,
           transform: `translate${this.vertical ? 'Y' : 'X'}(${-this.mainAxisTranslate}px)`,
           transition: this.transitionProperty,
-          display: 'inline-flex',
-          'flex-wrap': `${this.vertical ? '' : 'no'}wrap`
         }
       }
+    },
+    shouldAnimateIn () {
+      return this.animateIn || this.positioned
     },
     mainAxisDragOffset () {
       if (this.mainAxisStart === undefined || this.mainAxisEnd === undefined) return 0
@@ -80,12 +83,12 @@ export default {
     transitionProperty () {
       // If we're touching we want the transform to follow the finger immediately rather than
       // transitioning
-      return this.mainAxisEnd === undefined && this.animated
+      return this.mainAxisEnd === undefined && this.animated && this.shouldAnimateIn
         ? `transform ${this.transitionTime}s ${this.transition}`
         : 'all 0s'
     },
     mainAxisTranslate () {
-      return this.accumulatedTranslate - this.offsetToCenterInView + this.mainAxisDragOffset 
+      return this.accumulatedTranslate - this.offsetToCenterInView + this.mainAxisDragOffset
     },
     accumulatedTranslate () {
       return this.slideSizes.slice(0, this.value).reduce((a, c) => a + c, 0)
@@ -103,25 +106,12 @@ export default {
     }
   },
   methods: {
-    spawnIntervalHandler () {
-      this.intervalHandler = setInterval(() => {
-        // Don't auto-switch if the user is mid-drag
-        if (this.mainAxisStart === undefined) {
-          const forwards = this.autoScrollInterval > 0
-
-          if (forwards && this.value >= this.slideCount - 1) {
-            this.$emit('input', 0)
-          } else if (!forwards && this.value <= 0) {
-            this.$emit('input', this.slideCount - 1)
-          } else {
-            this.$emit('input', this.value + (forwards ? 1 : -1))
-          }
-        }
-      }, parseInt(Math.abs(this.autoScrollInterval)))
-    },
-    setSizes (el) {
+    recalculateDimensions (el) {
       const size = `client${this.vertical ? 'Height' : 'Width'}`
       const slides = this.$children.filter(vn => vn.$options.name === 'rl-carousel-slide')
+
+      this.slideCount = slides.length
+      if (this.value > this.slideCount - 1) this.$emit('input', Math.max(this.slideCount - 1, 0))
 
       this.clientSize = el[size]
       this.slideSizes.splice(0, this.slideSizes.length)
@@ -132,6 +122,8 @@ export default {
       } else {
         this.carouselSize = 0
       }
+
+      this.$emit('size-calculated')
     }
   },
   watch: {
@@ -139,34 +131,27 @@ export default {
       if (newVal >= this.slideCount) this.$emit('input', this.wrap ? 0 : this.slideCount - 1)
       if (newVal < 0) this.$emit('input', this.wrap ? this.slideCount - 1 : 0)
 
-      this.$emit('rl-carousel-slide-changed', this.value)
-    },
-    autoScrollInterval (newVal) {
-      clearInterval(this.intervalHandler)
-      if (newVal) {
-        this.spawnIntervalHandler()
-      }
+      this.$emit('slide-changed', this.value)
     }
   },
   mounted () {
-    this.slideCount = this.$children.filter(vn => vn.$options.name === 'rl-carousel-slide').length
-    this.setSizes(this.$el)
+    this.recalculateDimensions(this.$el)
 
     // Re-translate on bounds change
     erd.listenTo(this.$el, el => {
-      this.$emit('rl-carousel-resize')
-      this.setSizes(el)
+      this.$emit('resized')
+      this.recalculateDimensions(el)
     })
 
     this.touchstart = event => {
-      this.$emit('rl-carousel-touchstart')
+      this.$emit('touchstart')
 
       this.mainAxisStart = Math.floor(event.touches[0][`client${this.vertical ? 'Y' : 'X'}`])
       this.crossAxisStart = Math.floor(event.touches[0][`client${this.vertical ? 'X' : 'Y'}`])
     }
 
     this.touchmove = event => {
-      this.$emit('rl-carousel-touchmove')
+      this.$emit('touchmove')
 
       this.mainAxisEnd = Math.floor(event.touches[0][`client${this.vertical ? 'Y' : 'X'}`])
       this.crossAxisEnd = Math.floor(event.touches[0][`client${this.vertical ? 'X' : 'Y'}`])
@@ -181,7 +166,7 @@ export default {
     }
 
     this.touchend = () => {
-      this.$emit('rl-carousel-touchend')
+      this.$emit('touchend')
 
       // Just a touch, not a swipe
       if (this.mainAxisEnd === undefined) {
@@ -189,7 +174,7 @@ export default {
         return
       }
 
-      this.$emit('rl-carousel-swipe-recognized')
+      this.$emit('swipe-recognized')
 
       // Swipes >= 20% of carousel size change the active index.
       if ((Math.abs(this.mainAxisDragOffset) / this.slideSizes[this.value]) * 100 >= 20) {
@@ -206,22 +191,36 @@ export default {
       this.crossAxisEnd = undefined
     }
 
-    // Touch/swipe controls
     this.$el.addEventListener('touchstart', this.touchstart)
     this.$el.addEventListener('touchmove', this.touchmove)
     this.$el.addEventListener('touchend', this.touchend)
 
-    // Auto-scroll: negative interval to scroll backwards
-    if (this.autoScrollInterval) {
-      this.spawnIntervalHandler()
-    }
+    this.childNodeObserver = new MutationObserver(() => {
+      this.$emit('slide-count-changed')
+      this.recalculateDimensions(this.$el)
+    })
+
+    this.childNodeObserver.observe(
+      this.$el,
+      { childList: true, subtree: true }
+    )
+
+    // Delay animation for a frame so it doesn't draw in its default position and slide in
+    setTimeout(() => {
+      this.positioned = true
+      this.$emit('positioned')
+    }, 16)
   },
   beforeDestroy () {
+    this.$emit('before-destroy')
+
     erd.removeAllListeners(this.$el)
+
     this.$el.removeEventListener('touchstart', this.touchstart)
     this.$el.removeEventListener('touchmove', this.touchmove)
     this.$el.removeEventListener('touchend', this.touchend)
-    clearInterval(this.intervalHandler)
+
+    this.childNodeObserver.disconnect()
   }
 }
 </script>
