@@ -141,12 +141,10 @@ Events are fired when pretty much any decision is made or change is detected by 
 
 * The carousel wrapper works on the basis that the only in-flow child elements are `rl-carousel-item`s. Behaviour for when this is not the case is undefined and wacky things are likely to happen.
 
-* This is tested and confirmed working in the latest versions of Safari (11+), Chrome (67+), and Firefox (60+). I haven’t tested it in either IE or Edge because I don’t have access to a Windows machine and haven’t got around to testing in a VM yet. When I do I’ll update this, but in the mean time if you try it please let me know the results!
+* I've tried my demo implementations in the latest versions of Safari (11+), Chrome (67+), and Firefox (60+) and it works fine in all of them. I haven’t tested it in either IE or Edge because I don’t have access to a Windows machine and haven’t got around to testing in a VM yet. When I do I’ll update this, but in the mean time if you try it please let me know the results!
 
 ## Further work
 PRs welcome for both documentation and code. I’m happy to consider any new feature requests, but please bear in mind that this component is only concerned with carousel functionality; not appearance or styling.
 
 ## License
-This package is open-source software provided under the  [The MIT License](https://opensource.org/licenses/MIT) .
-
-#programming
+This package is open-source software provided under the [The MIT License](https://opensource.org/licenses/MIT).
