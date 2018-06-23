@@ -47,26 +47,27 @@ Outside of this, you have full responsibility for how your carousels render and 
 <template>
   <rl-carousel v-model="slide">
     <div slot-scope="{ wrapperStyles, slides: { count, active } }">
-    <!-- Modify these divs to control how the carousel renders -->
-    <div style="overflow: hidden; text-align: center;">
-      <div v-bind="wrapperStyles">
-      <!-- If your carousel will only appear in one place you could put your content right here, but slots allow for much greater reusability. -->
-      <slot></slot>
+      <!-- Modify these divs to control how the carousel renders -->
+      <div style="overflow: hidden; text-align: center;">
+        <div v-bind="wrapperStyles">
+        <!-- If your carousel will only appear in one place you could put your content right here,
+          but slots allow for much greater reusability. -->
+          <slot></slot>
+        </div>
       </div>
-    </div>
     </div>
     <!-- Slide controls go here (or above, or anywhere :) ) -->
   </rl-carousel>
 </template>
 
 <script>
-import { RlCarousel } from 'vue-render-less-carousel'
+import { RlCarousel } from 'vue-renderless-carousel'
 
 export default {
   name: 'your-carousel-component',
   data () {
     return {
-    slide: 0
+      slide: 0
     }
   }
 }
@@ -79,7 +80,7 @@ export default {
   <!-- Modify these divs to control how your slides render -->
   <rl-carousel-slide>
     <div style="text-align: center; width: 20vw;">
-    My slide
+      My slide
     </div>
   </rl-carousel-slide>
 </your-carousel-component>
