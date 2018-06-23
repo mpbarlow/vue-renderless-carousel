@@ -22,6 +22,7 @@ The initial work to implement these components is greater than using such an opt
 * Control over active slide via `v-model` binding
 * Automatic wrapping when navigating past the last slide 
 * Comprehensive event emission to help link your carousels to other parts of your application (including other carousels!)
+* The core layout system supports the latest versions of all major browsers [Safari, Chrome, Firefox, Edge, and IE (11)]
 
 ## Installation
 `npm install --save vue-renderless-carousel`
@@ -140,8 +141,6 @@ Events are fired when pretty much any decision is made or change is detected by 
 * While this library works nicely with touch events, mouse drag events don’t yet do anything. I’ll add this in future if there’s enough demand.
 
 * The carousel wrapper works on the basis that the only in-flow child elements are `rl-carousel-item`s. Behaviour for when this is not the case is undefined and wacky things are likely to happen.
-
-* I've tried my demo implementations in the latest versions of Safari (11+), Chrome (67+), and Firefox (60+) and it works fine in all of them. I haven’t tested it in either IE or Edge because I don’t have access to a Windows machine and haven’t got around to testing in a VM yet. When I do I’ll update this, but in the mean time if you try it please let me know the results!
 
 ## Further work
 PRs welcome for both documentation and code. I’m happy to consider any new feature requests, but please bear in mind that this component is only concerned with carousel functionality; not appearance or styling.
