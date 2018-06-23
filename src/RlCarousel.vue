@@ -84,7 +84,7 @@ export default {
       // If we're touching we want the transform to follow the finger immediately rather than
       // transitioning
       return this.mainAxisEnd === undefined && this.animated && this.shouldAnimateIn
-        ? `transform ${this.transitionTime}s ${this.transition}`
+        ? `transform ${parseFloat(this.transitionTime)}s ${this.transition}`
         : 'all 0s'
     },
     mainAxisTranslate () {
