@@ -36,8 +36,8 @@ The best place to start is to check the demo page linked above, which contains f
 
 * `wrapperStyles` contains CSS controlling the bulk of the actual carousel functionality, responsible for laying out and transforming the slides. In most cases you should blindly bind it to the `<div>` that is the direct parent of your slide content, but it’s common to add some additional styles or classes.
 * `slides` contains two fields:
-	* `count`: the number of slides in the carousel
-	* `active`: the zero-based index of the currently active slide. ‘Active’ refers to the slide the carousel is currently attempting to centre.
+  * `count`: the number of slides in the carousel
+  * `active`: the zero-based index of the currently active slide. ‘Active’ refers to the slide the carousel is currently attempting to centre.
 
 Outside of this, you have full responsibility for how your carousels render and behave.
 
@@ -47,28 +47,28 @@ Outside of this, you have full responsibility for how your carousels render and 
 <template>
   <rl-carousel v-model="slide">
     <div slot-scope="{ wrapperStyles, slides: { count, active } }">
-		<!-- Modify these divs to control how the carousel renders -->
-		<div style="overflow: hidden; text-align: center;">
-		  <div v-bind="wrapperStyles">
-			<!-- If your carousel will only appear in one place you could put your content right here, but slots allow for much greater reusability. -->
-			<slot></slot>
-		  </div>
-		</div>
-	  </div>
-	  <!-- Slide controls go here (or above, or anywhere :) ) -->
-	</rl-carousel>
+    <!-- Modify these divs to control how the carousel renders -->
+    <div style="overflow: hidden; text-align: center;">
+      <div v-bind="wrapperStyles">
+      <!-- If your carousel will only appear in one place you could put your content right here, but slots allow for much greater reusability. -->
+      <slot></slot>
+      </div>
+    </div>
+    </div>
+    <!-- Slide controls go here (or above, or anywhere :) ) -->
+  </rl-carousel>
 </template>
 
 <script>
 import { RlCarousel } from 'vue-render-less-carousel'
 
 export default {
-	name: 'your-carousel-component',
-	data () {
-	  return {
-		slide: 0
-	  }
-	}
+  name: 'your-carousel-component',
+  data () {
+    return {
+    slide: 0
+    }
+  }
 }
 </script>
 ```
@@ -76,12 +76,12 @@ export default {
 **template.html**
 ```vue
 <your-carousel-component>
-	<!-- Modify these divs to control how your slides render -->
-	<rl-carousel-slide>
-	  <div style="text-align: center; width: 20vw;">
-		My slide
-	  </div>
-	</rl-carousel-slide>
+  <!-- Modify these divs to control how your slides render -->
+  <rl-carousel-slide>
+    <div style="text-align: center; width: 20vw;">
+    My slide
+    </div>
+  </rl-carousel-slide>
 </your-carousel-component>
 ```
 
