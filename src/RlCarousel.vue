@@ -6,6 +6,11 @@ const erd = elementResizeDetectorMaker({ strategy: 'scroll' })
 export default {
   name: 'rl-carousel',
   props: {
+    align: {
+      type: String,
+      default: 'center',
+      validator: value => value.match(/^(left|center|right)$/) !== null
+    },
     animateIn: {
       type: Boolean,
       default: false
@@ -88,15 +93,22 @@ export default {
         : 'all 0s'
     },
     mainAxisTranslate () {
-      return this.accumulatedTranslate - this.offsetToCenterInView + this.mainAxisDragOffset
+      return this.accumulatedTranslate - this.offsetToAlignInView + this.mainAxisDragOffset
     },
     accumulatedTranslate () {
       return this.slideSizes.slice(0, this.value).reduce((a, c) => a + c, 0)
     },
-    offsetToCenterInView () {
-      return this.carouselSize < this.clientSize
-        ? (this.carouselSize / 2) - (this.slideSizes[this.value] / 2)
-        : (this.clientSize - this.slideSizes[this.value]) / 2
+    offsetToAlignInView () {
+      switch (this.align) {
+        case 'left':
+          return 0
+        case 'center':
+          return this.carouselSize < this.clientSize
+            ? (this.carouselSize / 2) - (this.slideSizes[this.value] / 2)
+            : (this.clientSize - this.slideSizes[this.value]) / 2
+        case 'right':
+          return this.clientSize - this.slideSizes[this.value]
+      }
     },
     wrap () {
       return !this.noWrap

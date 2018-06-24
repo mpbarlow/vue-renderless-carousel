@@ -16,6 +16,7 @@ The initial work to implement these components is greater than using such an opt
 * Horizontal or vertical carousels
 * Arbitrary slide width/height (slides can be any size)
 * Variable slide width/height (slides within the same carousel can be different sizes)
+* Align active slide to either the left, centre, or right of the carousel
 * Handles changes in bounding element size
 * Handles dynamic slide insertion and removal (via `v-for`, for example)
 * Full touch support
@@ -38,7 +39,7 @@ The best place to start is to check the demo page linked above, which contains f
 * `wrapperStyles` contains CSS controlling the bulk of the actual carousel functionality, responsible for laying out and transforming the slides. In most cases you should blindly bind it to the `<div>` that is the direct parent of your slide content, but it’s common to add some additional styles or classes.
 * `slides` contains two fields:
   * `count`: the number of slides in the carousel
-  * `active`: the zero-based index of the currently active slide. ‘Active’ refers to the slide the carousel is currently attempting to centre.
+  * `active`: the zero-based index of the currently active slide
 
 Outside of this, you have full responsibility for how your carousels render and behave.
 
@@ -51,7 +52,7 @@ Outside of this, you have full responsibility for how your carousels render and 
       <!-- Modify these divs to control how the carousel renders -->
       <div style="overflow: hidden; text-align: center;">
         <div v-bind="wrapperStyles">
-        <!-- If your carousel will only appear in one place you could put your content right here,
+          <!-- If your carousel will only appear in one place you could put your content right here,
           but slots allow for much greater reusability. -->
           <slot></slot>
         </div>
@@ -88,28 +89,30 @@ export default {
 ```
 
 ### Props
-`animateIn: Boolean` `default: false`
-Controls whether the initial positioning of the slides is animated. If true, the slides will initially lay out normally, then slide over to the active slide. If false, the initial slide will be centred immediately.
+`align: 'left'|'center'|'right'`, `default: 'center'`: Controls whether the active slide is aligned to the left, centre, or right of the carousel.
 
-`noWrap: Boolean` `default: false`
+`animateIn: Boolean`, `default: false`:
+Controls whether the initial positioning of the slides is animated. If true, the slides will initially lay out normally, then slide over to the active slide. If false, the initial slide will be aligned immediately.
+
+`noWrap: Boolean`, `default: false`:
 If set to true, attempting to navigate past the first or last slide will do nothing, rather than wrapping back around to the other end.
 
-`static: Boolean` `default: false`
+`static: Boolean`, `default: false`:
 Disables animations. Slide transitions will occur immediately. 
 
-`touchWrap: Boolean` `default: false`
+`touchWrap: Boolean`, `default: false`:
 Enables the wrapping behaviour for touch events.
 
-`transition: 'ease'|'linear'|'ease-in'|'ease-out'|'ease-in-out'|'cubic-bezier(Number, Number, Number, Number)'` `default: 'ease'`
+`transition: 'ease'|'linear'|'ease-in'|'ease-out'|'ease-in-out'|'cubic-bezier(Number, Number, Number, Number)'`, `default: 'ease'`:
 The CSS transition effect to use for slide animations.
 
-`transitionTime: Number|String` `default: 0.5`
+`transitionTime: Number|String`, `default: 0.5`:
 The duration for slide animations, in seconds.
 
-`value: Number` `required`
+`value: Number`, `required`:
 The value from the consumer to bind to the current active slide index. Using `v-model` is recommended as it grants the default wrapping behaviour for free.
 
-`vertical: Boolean` `default: false`
+`vertical: Boolean`, `default: false`:
 Renders the carousel in vertical mode.
 
 ### Events
@@ -136,7 +139,7 @@ Events are fired when pretty much any decision is made or change is detected by 
 ## Caveats and known issues
 * When developing, you will probably get the following console warning: ‘Duplicate presence of slot "default" found in the same render tree - this will likely cause render errors’. A lot. The good news is that it’s a harmless bug in Vue where it mistakes a slot-scope-triggered re-rendering of a slot for a duplicate slot. The bad news is that it’s a bug in Vue, so we need to wait for a new release before anything can be done. I have an open PR for a fix, but admittedly it’s a bit of a hack so I’m not so sure it’ll be accepted :) Fortunately, while it is annoying, the warning only fires in dev mode, so your production builds will be error free.
 
-* The method that attempts to centre the active slide within the carousel bounds requires the element that `wrapperStyles` is bound to be centred in its parent. This is normally not an issue, but in the event that the entire carousel is narrower than its parent, you might notice misalignment. Apply a `text-align: center` to the carousel’s direct parent element to fix this.
+* The method that attempts to align the active slide within the carousel bounds requires the element that `wrapperStyles` is bound to be centred in its parent. This is normally not an issue, but in the event that the entire carousel is narrower than its parent, you might notice misalignment. Apply a `text-align: center` to the carousel’s direct parent element to fix this.
 
 * While this library works nicely with touch events, mouse drag events don’t yet do anything. I’ll add this in future if there’s enough demand.
 
