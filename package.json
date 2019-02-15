@@ -1,11 +1,20 @@
 {
   "name": "vue-renderless-carousel",
   "description": "A renderless Vue component encapsulating carousel functionality",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "MIT",
   "author": "Matt Barlow",
-  "main": "index.js",
-  "homepage": "https://barlow.coffee/carousel",
+  "main": "dist/index.umd.js",
+  "module": "dist/index.esm.js",
+  "unpkg": "dist/index.min.js",
+  "browser": {
+    "./sfc": "src/index.js"
+  },
+  "homepage": "https://mpbarlow.github.io/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mpbarlow/vue-renderless-carousel.git"
+  },
   "keywords": [
     "vue",
     "carousel",
@@ -13,6 +22,9 @@
     "vuejs",
     "component"
   ],
+  "scripts": {
+    "build": "prettier --check 'src/**' && rollup --config rollup.config.js"
+  },
   "dependencies": {
     "element-resize-detector": "^1.1.14"
   },
@@ -20,13 +32,13 @@
     "vue": "^2.5.0"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.3",
-    "eslint": "^4.19.1",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-plugin-import": "^2.12.0",
-    "eslint-plugin-node": "^6.0.1",
-    "eslint-plugin-promise": "^3.8.0",
-    "eslint-plugin-standard": "^3.1.0",
-    "eslint-plugin-vue": "^4.5.0"
+    "prettier": "1.16.4",
+    "rollup": "^1.1.2",
+    "rollup-plugin-buble": "^0.19.6",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-terser": "^4.0.4",
+    "rollup-plugin-vue": "^4.7.1",
+    "vue-template-compiler": "^2.5.0"
   }
 }
