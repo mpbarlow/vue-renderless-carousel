@@ -32,7 +32,35 @@ The initial work to implement these components is greater than using such an opt
 
 `npm install --save vue-renderless-carousel`
 
-This library provides two components: `rl-carousel` and `rl-carousel-slide`. The former is used to implement your carousel, while the latter is a dumb wrapper for your slide content. Import or register them how you would any other Vue component.
+This library provides two components: `rl-carousel` and `rl-carousel-slide`. The former is used to implement your carousel, while the latter is a dumb wrapper for your slide content.
+
+Once imported, they may be registered with Vue as with any other component.
+
+### ES6
+
+```javascript
+import { RlCarousel, RlCarouselSlide } from 'vue-renderless-carousel'
+```
+
+### UMD
+
+```javascript
+const { RlCarousel, RlCarouselSlide } = require('vue-renderless-carousel')
+```
+
+### Directly In-Browser
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/vue-renderless-carousel@1.2.0/dist/index.min.js"></script>
+<script>
+  Vue.component('RlCarousel', VueRenderlessCarousel.RlCarousel)
+  Vue.component('RlCarouselSlide', VueRenderlessCarousel.RlCarouselSlide)
+  ...
+</script>
+```
+
+If you use a bundler that supports the `browser` field in `package.json`, you may access the .vue SFCs directly by importing from `vue-renderless-carousel/sfc`.
 
 ## Usage and API
 
@@ -149,13 +177,11 @@ Events are fired when pretty much any decision is made or change is detected by 
 
 ## Caveats and known issues
 
-- Under Vue 2.5.x, when developing, you will probably get the following console warning: ‘Duplicate presence of slot "default" found in the same render tree - this will likely cause render errors’. A lot. This is a harmless bug in Vue where it mistakes a slot-scope-triggered re-rendering of a slot for a duplicate slot, and is fixed as of Vue 2.6.x. Fortunately, while it is annoying, the warning only fires in dev mode, so your production builds will be error free.
-
 - The method that attempts to align the active slide within the carousel bounds requires the element that `wrapperStyles` is bound to be centred in its parent. This is normally not an issue, but in the event that the entire carousel is narrower than its parent, you might notice misalignment. Apply a `text-align: center` to the carousel’s direct parent element to fix this.
 
 - While this library works nicely with touch events, mouse drag events don’t yet do anything. I’ll add this in future if there’s enough demand.
 
-- The carousel wrapper works on the basis that the only in-flow child elements are `rl-carousel-item`s. Behaviour for when this is not the case is undefined and wacky things are likely to happen.
+- The carousel wrapper works on the basis that the only in-flow child elements are `rl-carousel-item`s. If this is not the case, wacky things are likely to happen. Let me know how it goes though.
 
 ## Further work
 
