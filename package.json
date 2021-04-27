@@ -23,7 +23,7 @@
     "component"
   ],
   "scripts": {
-    "build": "prettier --check 'src/**' && rollup --config rollup.config.js"
+    "build": "prettier --write 'src/**' && rollup --config rollup.config.js"
   },
   "dependencies": {
     "element-resize-detector": "^1.2.2"
