@@ -163,35 +163,36 @@ export default {
       }
 
       if (newVal < 0) {
-        this.$emit('input', this.wrap ? this.slideCount - 1 : 0)
+        this.$emit("input", this.wrap ? this.slideCount - 1 : 0);
       }
 
-      this.$emit('slide-changed', this.value)
-    }
+      this.$emit("slide-changed", this.value);
+    },
   },
   mounted() {
-    this.recalculateDimensions(this.$el)
+    this.recalculateDimensions(this.$el);
 
-    // Re-translate on bounds change
-    erd.listenTo(this.$el, el => {
-      this.$emit('resized')
-      this.recalculateDimensions(el)
-    })
+    // Re-translate on bounds change.
+    erd.listenTo(
+      this.$el,
+      debounce(() => {
+        this.$emit("resized");
+        this.recalculateDimensions(this.$el);
+      }, 16)
+    );
 
-    this.touchstart = event => {
-      this.$emit('touchstart')
+    this.touchstart = (event) => {
+      this.$emit("touchstart");
 
-      this.mainAxisStart = Math.floor(event.touches[0][`client${this.vertical ? 'Y' : 'X'}`])
+      this.mainAxisStart = Math.floor(event.touches[0][`client${this.vertical ? "Y" : "X"}`]);
+      this.crossAxisStart = Math.floor(event.touches[0][`client${this.vertical ? "X" : "Y"}`]);
+    };
 
-      this.crossAxisStart = Math.floor(event.touches[0][`client${this.vertical ? 'X' : 'Y'}`])
-    }
+    this.touchmove = (event) => {
+      this.$emit("touchmove");
 
-    this.touchmove = event => {
-      this.$emit('touchmove')
-
-      this.mainAxisEnd = Math.floor(event.touches[0][`client${this.vertical ? 'Y' : 'X'}`])
-
-      this.crossAxisEnd = Math.floor(event.touches[0][`client${this.vertical ? 'X' : 'Y'}`])
+      this.mainAxisEnd = Math.floor(event.touches[0][`client${this.vertical ? "Y" : "X"}`]);
+      this.crossAxisEnd = Math.floor(event.touches[0][`client${this.vertical ? "X" : "Y"}`]);
 
       // If the swipe is more horizontal than vertical, prevent scrolling.
       const angle =
@@ -226,22 +227,22 @@ export default {
         }
       }
 
-      this.mainAxisStart = undefined
-      this.mainAxisEnd = undefined
-      this.crossAxisStart = undefined
-      this.crossAxisEnd = undefined
-    }
+      this.mainAxisStart = undefined;
+      this.mainAxisEnd = undefined;
+      this.crossAxisStart = undefined;
+      this.crossAxisEnd = undefined;
+    };
 
-    this.$el.addEventListener('touchstart', this.touchstart)
-    this.$el.addEventListener('touchmove', this.touchmove)
-    this.$el.addEventListener('touchend', this.touchend)
+    this.$el.addEventListener("touchstart", this.touchstart);
+    this.$el.addEventListener("touchmove", this.touchmove);
+    this.$el.addEventListener("touchend", this.touchend);
 
     this.childNodeObserver = new MutationObserver(() => {
-      this.$emit('slide-count-changed')
-      this.recalculateDimensions(this.$el)
-    })
+      this.$emit("slide-count-changed");
+      this.$nextTick(() => this.recalculateDimensions(this.$el));
+    });
 
-    this.childNodeObserver.observe(this.$el, { childList: true, subtree: true })
+    this.childNodeObserver.observe(this.$el, { childList: true, subtree: true });
 
     // Delay animation for a frame so it doesn't draw in its default position and slide in
     setTimeout(() => {
