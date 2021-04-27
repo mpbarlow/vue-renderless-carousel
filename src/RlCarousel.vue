@@ -132,29 +132,29 @@ export default {
   },
   methods: {
     recalculateDimensions(el) {
-      const size = `client${this.vertical ? 'Height' : 'Width'}`
+      const size = (el) =>
+        this.vertical ? el.getBoundingClientRect().height : el.getBoundingClientRect().width;
 
-      const slides = this.$children.filter(vn => vn.$options.name === 'rl-carousel-slide')
+      const slides = this.$children.filter((vn) => vn.$options.name === "rl-carousel-slide");
 
-      this.slideCount = slides.length
+      this.slideCount = slides.length;
 
       if (this.value > this.slideCount - 1) {
-        this.$emit('input', Math.max(this.slideCount - 1, 0))
+        this.$emit("input", Math.max(this.slideCount - 1, 0));
       }
 
-      this.clientSize = el[size]
-      this.slideSizes.splice(0, this.slideSizes.length)
+      this.clientSize = size(el);
+      this.slideSizes.splice(0, this.slideSizes.length);
 
       if (slides.length > 0) {
-        this.slideSizes.push(...slides.map(s => s.$el[size]))
-
-        this.carouselSize = slides.map(s => s.$el[size]).reduce((a, c) => a + c, 0)
+        this.slideSizes.push(...slides.map((s) => size(s.$el)));
+        this.carouselSize = this.slideSizes.reduce((a, c) => a + c, 0);
       } else {
-        this.carouselSize = 0
+        this.carouselSize = 0;
       }
 
-      this.$emit('size-calculated')
-    }
+      this.$emit("size-calculated");
+    },
   },
   watch: {
     value(newVal) {
