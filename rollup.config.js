@@ -1,11 +1,11 @@
-import buble from 'rollup-plugin-buble'
-import commonjs from 'rollup-plugin-commonjs'
-import resolve from 'rollup-plugin-node-resolve'
-import { terser } from 'rollup-plugin-terser'
-import vue from 'rollup-plugin-vue'
+import { terser } from "rollup-plugin-terser";
+import buble from "@rollup/plugin-buble";
+import commonjs from "@rollup/plugin-commonjs";
+import resolve from "@rollup/plugin-node-resolve";
+import vue from "rollup-plugin-vue";
 
 const common = {
-  input: 'src/index.js',
+  input: "src/index.js",
   plugins: [
     commonjs(),
     resolve(),
@@ -16,11 +16,11 @@ const common = {
     buble(),
     terser()
   ]
-}
+};
 
-const exports = 'named'
-const external = ['element-resize-detector']
-const name = 'VueRenderlessCarousel'
+const exports = "named";
+const external = ["element-resize-detector"];
+const name = "VueRenderlessCarousel";
 
 const outputs = [
   {
@@ -28,9 +28,9 @@ const outputs = [
     output: {
       exports,
       file: `dist/index.umd.js`,
-      format: 'umd',
+      format: "umd",
       globals: {
-        'element-resize-detector': 'elementResizeDetectorMaker'
+        "element-resize-detector": "elementResizeDetectorMaker"
       },
       name
     }
@@ -40,7 +40,7 @@ const outputs = [
     output: {
       exports,
       file: `dist/index.esm.js`,
-      format: 'es',
+      format: "es",
       name
     }
   },
@@ -48,10 +48,10 @@ const outputs = [
     output: {
       exports,
       file: `dist/index.min.js`,
-      format: 'iife',
+      format: "iife",
       name
     }
   }
-]
+];
 
-export default outputs.map(output => ({ ...common, ...output }))
+export default outputs.map(output => ({ ...common, ...output }));
