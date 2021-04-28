@@ -239,7 +239,7 @@ export default {
 
     this.childNodeObserver = new MutationObserver(() => {
       this.$emit("slide-count-changed");
-      this.$nextTick(() => this.recalculateDimensions(this.$el));
+      this.recalculateDimensions(this.$el);
     });
 
     this.childNodeObserver.observe(this.$el, { childList: true, subtree: true });
