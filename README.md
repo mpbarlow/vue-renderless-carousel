@@ -1,5 +1,9 @@
 # Vue Renderless Carousel
 
+### ⚠️ Please note
+
+**This package is Vue 2 only.** It is not compatible with Vue 3 and, due to removal of certain APIs, there are no plans to implement a Vue 3-compatible version.
+
 ### Encapsulated carousel behaviour — just add templates
 
 [Demo page with a handful of sample implementations](https://mpbarlow.github.io)
